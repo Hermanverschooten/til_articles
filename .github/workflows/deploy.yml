@@ -1,0 +1,31 @@
+name: Deploy to production
+
+on:
+  push:
+    branches:
+      - main
+
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: WireGuard
+        uses: Hermanverschooten/wireguard@v0.0.01-alpha
+        with:
+          config: '${{ secrets.WIREGUARD }}'
+
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+      - name: Setup SSH config
+        run: echo 'StrictHostKeyChecking no' >> ~/.ssh/config
+      - name: Sync project files
+        run: rsync -avzr --delete --exclude=.git/ --exclude=.github/ ${GITHUB_WORKSPACE}/ ${{ secrets.DEPLOY_TO }}
+      - name: Reload
+        run: curl -v https://til.verschooten.name/reload
+
