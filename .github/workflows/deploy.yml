@@ -25,7 +25,7 @@ jobs:
       - name: Setup SSH config
         run: echo 'StrictHostKeyChecking no' >> ~/.ssh/config
       - name: Sync project files
-        run: rsync -avzr --delete --exclude=.git/ --exclude=.github/ ${GITHUB_WORKSPACE}/ ${{ secrets.DEPLOY_TO }}
+        run: rsync -avzr --delete ${GITHUB_WORKSPACE}/20* ${{ secrets.DEPLOY_TO }}
       - name: Reload
         run: curl -v https://til.verschooten.name/reload
 
