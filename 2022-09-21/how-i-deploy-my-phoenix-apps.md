@@ -135,16 +135,16 @@ jobs:
       MIX_ENV: prod
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install OTP and Elixir
-        uses: erlef/setup-elixir@v1
+        uses: erlef/setup-beam@v1.14
         with:
           otp-version: ${{ env.otp-version }}
           elixir-version: ${{ env.elixir-version }}
 
       - name: Cache mix deps
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: mix-deps-prod
         with:
@@ -152,7 +152,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.otp-version }}-${{ env.elixir-version }}-${{ env.cache-name }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock'))}}
 
       - name: Cache build
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: mix-build-prod-v1
         with:
@@ -170,16 +170,16 @@ jobs:
       MIX_ENV: prod
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install OTP and Elixir
-        uses: erlef/setup-elixir@v1
+        uses: erlef/setup-beam@v1.14
         with:
           otp-version: ${{ env.otp-version }}
           elixir-version: ${{ env.elixir-version }}
 
       - name: Cache mix deps
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: mix-deps-prod
         with:
@@ -187,7 +187,7 @@ jobs:
           key: ${{ runner.os }}-${{ env.otp-version }}-${{ env.elixir-version }}-${{ env.cache-name }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock'))}}
 
       - name: Cache build
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: mix-build-prod-v1
         with:
@@ -195,12 +195,12 @@ jobs:
           key: ${{ runner.os }}-${{ env.otp-version }}-${{ env.elixir-version }}-${{ env.cache-name }}-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock'))}}
 
       - name: Install Node.js
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ env.node-version }}
 
       - name: Cache node modules
-        uses: actions/cache@v1
+        uses: actions/cache@v3
         env:
           cache-name: npm-deps-v1
         with:
@@ -249,9 +249,13 @@ Your ssh private key must also be present as a Github secret called `SSH_KEY`.
 You are free to replace any of these settings with more Github secrets
 
 ### Wireguard?
-Why do I use Wireguard in this deploy? Most of my ProxMox containers are only avaiable on IPv6 addresses and Github actions currently does not support IPv6. This means I cannot access the server directly. Each of these instances has a secondary network interface that has a private-range-ip. I have setup a Wireguard server that allows access to that range.
+Why do I use Wireguard in this deploy? Most of my ProxMox containers are only available on IPv6 addresses and Github actions currently does not support IPv6. This means I cannot access the server directly. Each of these instances has a secondary network interface that has a private-range-ip. I have setup a Wireguard server that allows access to that range.
 
 ### Webserver
-Recently I have begun to deploy apps that use `SiteEncrypt` for https, this removes the need to setup a reverse-proxy in front of the app. It brings in a bit more configuration, you can find most of the info on [HexDocs](https://hexdocs.pm/site_encrypt/readme.html).  You'll probably need to a some more `Environment` keys to the unit-file, but that is a topic of another, maybe future, blog-post.
+Recently I have begun to deploy apps that use `SiteEncrypt` for https, this removes the need to setup a reverse-proxy in front of the app. It brings in a bit more configuration, you can find most of the info on [HexDocs](https://hexdocs.pm/site_encrypt/readme.html).  You'll probably need to add some more `Environment` keys to the unit-file, but that is a topic of another, maybe future, blog-post.
 
 The attentive reader will have noticed that most of my VPS only have an IPv6 address... how are they reachable for IPv4? I use a set of `haproxy` instances for this. Depending on the webserver using either `Proxy-Protocol` or just plain `https`.
+
+<br/>
+**UPDATE 2022-12-13**
+Due to a Node.js deprecation in the Github Action workers, it was necessary to update the versions of most actions.
