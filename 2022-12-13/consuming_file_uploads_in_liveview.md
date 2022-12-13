@@ -4,7 +4,7 @@ Consuming file uploads in Phoenix live view
 -- TAGS --
 elixir
 phoenix
-liveview
+live_view
 upload
 -- TLDR --
 Phoenix liveview offers a nice way to upload files, or does it?
