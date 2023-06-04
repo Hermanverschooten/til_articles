@@ -77,6 +77,44 @@ index 0000000..61cc4d2
 +    %{errors: %{detail: Phoenix.Controller.status_message_from_template(template)}}
 +  end
 +end
+
+new file mode 100644
+index 0000000..d528c2e
+--- /dev/null
++++ b/test/crafts_things_web/controllers/error_html_test.exs
+@@ -0,0 +1,14 @@
++defmodule CraftsThingsWeb.ErrorHTMLTest do
++  use CraftsThingsWeb.ConnCase, async: true
++
++  # Bring render_to_string/4 for testing custom views
++  import Phoenix.Template
++
++  test "renders 404.html" do
++    assert render_to_string(CraftsThingsWeb.ErrorHTML, "404", "html", []) == "Not Found"
++  end
++
++  test "renders 500.html" do
++    assert render_to_string(CraftsThingsWeb.ErrorHTML, "500", "html", []) == "Internal Server Error"
++  end
++end
+
+new file mode 100644
+index 0000000..25c6d9d
+--- /dev/null
++++ b/test/crafts_things_web/controllers/error_json_test.exs
+@@ -0,0 +1,12 @@
++defmodule CraftsThingsWeb.ErrorJSONTest do
++  use CraftsThingsWeb.ConnCase, async: true
++
++  test "renders 404" do
++    assert CraftsThingsWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
++  end
++
++  test "renders 500" do
++    assert CraftsThingsWeb.ErrorJSON.render("500.json", %{}) ==
++             %{errors: %{detail: "Internal Server Error"}}
++  end
++end
 ```
 I opted to add an empty `CoreComponents` for now, instead of copying the proposed one from a newly generated project, so I can see what I need in there.
 I then copied my layouts to a new `layouts_html` folder inside the `components` folder, making sure to replace `Routes.static_path` with the correct `~p`-paths.
