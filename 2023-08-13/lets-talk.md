@@ -16,7 +16,7 @@ To facilitate this, Elixir offers us a few nice libraries built upon the Erlang 
 
 The most basic example, as seen in the Elixir [guides](https://elixir-lang.org/getting-started/mix-otp/distributed-tasks.html), is connecting 2 nodes and running some code on the other node.
 But that is not what we are talking about here. What we want is a simple mechanism to have the nodes subscribe to a topic and listen for notifications.
-Sounds familiar? Yes I am talking about PubSub or Publish and Subscribe, offered to use by `Phoenix.PubSub`
+Sounds familiar? Yes I am talking about PubSub or Publish and Subscribe, offered to us by `Phoenix.PubSub`
 
 A small example, open iex:
 ```elixir
@@ -53,12 +53,13 @@ cd talkies
 Edit `mix.exs` and add `Phoenix.PubSub` to it.
 
 ```elixir
-...
+   ...
   defp deps do
     [
         {:phoenix_pubsub, "~> 2.1"}
     ]
   end  
+  ...
 ```
 
 And start it with the app in `application.ex`
@@ -77,22 +78,23 @@ Get the dependencies and start the app.
 mix deps.get
 iex -S mix
 ```
-Now if you repeat the `subscribe` and `broadcast`, you will see this already works.
+If you repeat the `subscribe` and `broadcast`, you will see this already works.
 
 ## Make 2 nodes talk
 
 So now that we have this little `app`, let's use it to make 2 versions of our app talk to each other.
 
 In 2 seperate terminals start the app with a short name, `iex --sname app1 -S mix` and `iex --sname app2 -S mix`.
-You will notice that `iex` prompt now includes the node name, `app1@computername`.
-We will do our suubscribe in `app1`, do a publish in `app2`, `flush` in `app1`, and... nothing happened. ???
+You will notice the `iex` prompt now includes the node name, `app1@computername`.
+We will do our subscribe in `app1`, do a publish in `app2`, `flush` in `app1`, and... nothing happened ???
 We have started the apps with networking enabled, but we haven't yet connect them.
-In either app, do `Node.connect(:"app2@computername)`, where you use the name of the other node as seen in the iex prompt, this name is given as an `atom`.
+In either app, do `Node.connect(:"app2@computername")`, where you use the name of the other node as seen in the iex prompt, this name is given as an `atom`.
 Now do the broadcast again and flush, yes, we have received our message. Great!
 
+
 So what have we learned so far?
-* If you start your app with the `--sname`, you can connect to other nodes.
-* If you start a `Phoenix.PubSub` in multiple nodes, with the *same name*, they automically are connected.
+* If you start your app with the `--sname`, you can connect to other nodes on the same computer.
+* If you start a `Phoenix.PubSub` in multiple nodes, with the **same name**, they automically are connected.
 * We have not seen this in our example, but all nodes need to use the same erlang cookie! See the above mentioned guide for more info.
 
 ## Cluster the apps
@@ -116,7 +118,7 @@ Add the topology to the `start` method before the `children`;
 Only nodes knowing the `secret` can talk to each other. Start both apps again.
 After starting the second app, you should notice a message in your console saying `10:19:18.074 [info] [libcluster:talkies] connected to :app1@computer`.
 Our nodes have found each other and connected, you can see this with `Node.list/0`.
-Se if we do the subscribe and broadcast, this will already work, nice.
+Se if we subscribe and broadcast, this will already work, nice.
 In a `Phoenix` app you would do the same, add the dependency, your topology and add the `Cluster.Supervisor` to the list of children.
 Once you do this and you start 2 instances of your app (using `--sname`) channels, ... will work across the instances.
 You can subscribe to broadcasts in your live view pages, or use a `GenServer`, ...
@@ -174,7 +176,7 @@ config/runtime.exs
 
   config :talkies,
     topology: [
-      ipc: [
+      talkies: [
         strategy: Cluster.Strategy.Epmd,
         config: [
           hosts: topology_hosts |> String.split(",") |> Enum.map(&String.to_atom/1)
@@ -182,17 +184,19 @@ config/runtime.exs
       ]
     ]
 ```
-To make it easy to add aditional nodes I opted to put them in to an environment variable, seperated by commas.
+To make it easy to add aditional nodes I opted to put them in an environment variable, seperated by commas.
 In my systemd unit file, I already had the `ERLANG_COOKIE` set, but I ensure it is the same for all apps that want to talk to each other.
 I then add the `PARTNERS`:
-```
+
+```elixir
   Environment=ERLANG_COOKIE=A_very_super_secret_cookie_that_noone_can_guess
   Environment=PARTNERS=app2@example.org,app3@example.org
 ```
+
 Note that we use long names in production and that `epmd` should be reachable on all hosts.
-On the topic of long names, something to consider. I was deploying 2 new apps a couple of days back in the same container and ran into a snag.
+On the topic of long names, something to consider, I was deploying 2 new apps a couple of days back in the same container and ran into a snag.
 I first set `RELEASE_DISTRIBUTION` to `sname`, to use short names, same host, why need long names, `api@mdx-staging`, but that didn't work. 
-The erlang networking would refused to find the others. So I set it back to `name`, and tried `api@localhost`, this failed too as `localhost` is not a valid long name, duh!
+The erlang networking refused to find the others. So I set it back to `name`, and tried `api@localhost`, this failed too as `localhost` is not a valid long name, duh!
 Setting it to the full resolvable hostname would not work because this resolved to an IPv6 address and epmd while listening on `::4369` refused to connect.
 So I resolved to point `localhost.example.org` to `127.0.0.1` in my `/etc/hosts` file and then set `PARTNERS=api@localhost.example.org`, that did work!
 
@@ -206,10 +210,11 @@ This is the most challening part.
 Aside from the `epmd` troubles, it is quite easy to add inter-app communication in Elixir.
 But why should you, would you?
 I mostly use it to inform one of the other apps something has changed, say you have a customer dashboard and a back-office dashboard in 2 seperate apps.
-When a customer places an order, you can broadcast it and do something useful in the back-office ap, send mail, sms, ...
+When a customer places an order, you can broadcast it and do something useful in the back-office app, process the order, send mail, sms, ...
 Or in one of my projects, I have one app that talks to a number of `Nerves` devices over `Phoenix` channels, the other app has a dashboard that displays realtime information from the devices, and can send back commands.
 
 Don't forget if you are using multiple different `Phoenix` applications to have them all use the same name for the `PubSub`, by default it will be `YourApp.PubSub`!
 
-*Tip!* Although `epmd` will not allow communication without the correct `ERLANG_COOKIE` it may be usefull to use a firewall rule to only allow the `PARTNERS` access.
+
+**Tip!** Although `epmd` will not allow communication without the correct `ERLANG_COOKIE` it's better to restrict access to all but the `PARTNERS`.
 
