@@ -233,7 +233,7 @@ the mean time renaming `.html.eex` to `.html.heex` to enjoy the new html-checkin
 Hmm, that is no fun!
 
 I have a category menu that is renderen in each file on the top of the page, using `render/2` which no longer exists.
-So we need to convert this `_categoory.html.heex` into a component, not that difficult. Create a `category.ex` underneath `components`.
+So we need to convert this `_category.html.heex` into a component, not that difficult. Create a `category.ex` underneath `components`.
 ```elixir
 def CraftsThingsWeb.Category do
   use Phoenix.Component
@@ -254,6 +254,8 @@ I need to pass in `@conn`, because I need to access the sessions, and I have not
 Next up, then 'link/2' function does not exist anymore, at least it is not availabel from `Phoenix.Component`, so replace them all with the new `.link`-component.
 Then `img_tag/2`, I decided to replace them with regular HTML `img` tags.
 
+While doing this I also needed to replace all references to `Routes.page_path/2` to the new verified routes `sigil_p` syntax.
+
 A `form_for`, what should I do with this one. Well I have no changeset and I am not using the `f` variable, so let's replace it with a regular HTML `form`,
 and do not forget to add a hidden `input` with the csrf value.
 
@@ -270,6 +272,30 @@ Oh before I forget, since we are using `heex`-files now, we need to make some ch
 +  import_deps: [:ecto, :ecto_sql, :phoenix],
 +  plugins: [Phoenix.LiveView.HTMLFormatter],
 +  inputs: ["*.{heex,ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{heex,ex,exs}"],
+```
+
+I must say that I like the changes I made so far, I prefer the new location of the HTML-files,
+and love getting away from the `Phoenix.HTML.Tags` functions and use the more HTML-like components, or just plain old HTML.
+
+### Mini-components?
+Another thing I learned was that in `pageHTML` you cannot only use functions but also component-like functions.
+```elixir
+  def prefix(assigns) do
+    ~H"""
+    <%= if @product.category.menu == "S" do %>
+      <%= render_slot(@inner_block) %> <%= @product.category.name %>
+    <% else %>
+      <%= @product.category.name %>
+    <% end %>
+    """
+  end
+```
+
+and then just use it like
+```elixir
+<.prefix product={@product}>
+    <span class="text-gray-500">stempels</span>
+</.prefix>
 ```
 
 Now let's continue with the other controllers and see what they have in store for us...
