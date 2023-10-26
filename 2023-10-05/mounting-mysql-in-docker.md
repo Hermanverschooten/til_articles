@@ -31,7 +31,7 @@ Sadly this failed with:
 2023-10-05T12:38:44.366843Z 0 [ERROR] [MY-010119] [Server] Aborting
 2023-10-05T12:38:44.958349Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.0.34)  MySQL Community Server - GPL.
 ```
-This is caused by my machine being MacOS and the original server being a Linux, Linus has a case-sentive filesystem, Mac does not by default.
+This is caused by my machine being MacOS and the original server being a Linux, Linux has a case-sensitive filesystem, Mac does not by default.
 
 To resolve this you can create a sparse-file that has a case-sensitive filesystem and mount it.
 ```elixir
