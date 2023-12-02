@@ -112,7 +112,7 @@ interface lan {
 };
 ```
 
-This was the most-of-the-time working configuration, I wrote about it in [Github Gist](https://gist.github.com/Hermanverschooten/40c701b7f52e256502c9fe78473912e4) a few years back.
+This was the _most-of-the-time_ working configuration, I wrote about it in a [Github Gist](https://gist.github.com/Hermanverschooten/40c701b7f52e256502c9fe78473912e4) a few years back.
 Funny thing is that when I was googling this morning, I got either my own gist as answer or someone on Stack Overflow pointing to it.
 There do not seem to be that many resources on the net.
 
