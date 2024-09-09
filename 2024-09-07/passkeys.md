@@ -24,7 +24,7 @@ I spent a couple of hours reading the code and the accompanying demo application
 
 We start out with adding the package to our mix file and running `mix deps.get`
 ```elixir
-     {:webauthn_components, "~> 0.7"}
+     {:webauthn_components, "~> 0.8"}
 ```
 
 A large part of the authentication flow is handled with Javascript, so let's first add these parts to our `app.js`
